@@ -1,1 +1,1 @@
-# mongoose-mailgun
+# mongodb-mailgun

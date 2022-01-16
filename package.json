@@ -1,0 +1,28 @@
+{
+  "name": "mongodb-mailgun",
+  "version": "1.0.0",
+  "description": "Sends backup of all collections in mongodb using your mailgun api",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Roeldamen/mongoose-mailgun.git"
+  },
+  "keywords": [
+    "mongoose",
+    "mailgun",
+    "mongodb"
+  ],
+  "author": "Roel Damen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Roeldamen/mongoose-mailgun/issues"
+  },
+  "homepage": "https://github.com/Roeldamen/mongoose-mailgun#readme",
+  "dependencies": {
+    "mailgun-js": "^0.22.0",
+    "mongoose": "^6.1.6"
+  }
+}
