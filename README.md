@@ -1,5 +1,5 @@
 # mongodb-mailgun-backup
-Sends backup of all collections in a mongodb using mailgun.
+Sends a backup of all collections in a mongodb using mailgun.
 
 # Installation
 ```

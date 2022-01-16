@@ -1,7 +1,7 @@
 {
   "name": "mongodb-mailgun-backup",
   "version": "1.0.0",
-  "description": "Sends a snapshot of all the collections in your mongodb via email using your mailgun api.",
+  "description": "Sends a snapshot of your mongodb collections via email using your mailgun api.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
