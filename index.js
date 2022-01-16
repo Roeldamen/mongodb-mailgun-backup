@@ -1,56 +1,56 @@
 const mailgun = require('mailgun-js')
-const helpers = require("./helpers")
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema
 
-class Mailgun {
-  constructor(apiKey, domain, host, mongo_uri) {
-    this.apiKey = apiKey;
-    this.domain = domain;
-    this.host = host;
-    this.mongo_uri = mongo_uri
+class MongoMailBackup {
+  constructor(config) {
+    this.mongo_uri = config.mongo_uri
     this.mg = mailgun({
-      apiKey: apiKey,
-      domain: domain,
-      host: host
+      apiKey: config.mailgun_key,
+      domain: config.mailgun_domain,
+      host: config.mailgun_host
     })
   }
 
-  getBackupAll = (mailgunData) => {
-    const sendMail = this.sendMail
-    const mg = this.mg
-    mongoose.connect(this.mongo_uri, { useNewUrlParser: true, useUnifiedTopology: true });
-    mongoose.connection.on('open', function (ref) {
-      console.log(this.mg)
-      console.log('Connected to mongo server.');
-      mongoose.connection.db.listCollections().toArray()
-        .then(async function (collections) {
-          const data = await helpers.getAllData(collections, mg)
-          console.log(data)
-          mailgunData.attachment = data
-          return sendMail(mailgunData)
-        })
-        .catch((err) => {
-          console.log(err)
-          return err
-        })
-        .finally(() => {
-          mongoose.connection.close()
-        })
+  mongoToMail = (mailgunParams) => {
+    mongoose.connect(this.mongo_uri, { useNewUrlParser: true, useUnifiedTopology: true })
+      .catch(error => {
+        console.log(error)
+        return error
+      });
+    mongoose.connection.on('error', err => {
+      logError(err);
+      return err
+    });
+
+    mongoose.connection.on('open', async () => {
+      const collections = await mongoose.connection.db.listCollections().toArray()
+      const data = await this.#getAllCollections(collections)
+      console.log("Number of attachments:", data.length)
+      mailgunParams.attachment = data
+      const result = await this.mg.messages().send(mailgunParams)
+      console.log("Mailgun response:", result)
+      mongoose.connection.close()
     })
   }
 
-  sendMail = (data) => {
-    return new Promise((resolve, reject) => {
-      this.mg.messages().send(data, (error, response) => {
-        if (error) {
-          console.log("got an error: ", error);
-          reject(error)
-        }
-        console.log("Success: ", response)
-        resolve(response)
-      })
-    })
+  #getAllCollections = async (collections) => {
+    let data = []
+    for (const item of collections) {
+      const result = await this.#getCollectionData(item.name)
+      data.push(result)
+    }
+    return data
+  }
+
+  #getCollectionData = async (collecionName) => {
+    console.log("Creating JSON attachment for", collecionName)
+    const ProductSchema = new Schema({}, { strict: false });
+    const Product = mongoose.model(collecionName, ProductSchema, collecionName);
+    const data = await Product.find({})
+
+    return new this.mg.Attachment({ data: Buffer.from(JSON.stringify(data)), filename: `${collecionName}.json` })
   }
 }
 
-module.exports = Mailgun
+module.exports = MongoMailBackup

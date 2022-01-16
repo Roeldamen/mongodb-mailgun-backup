@@ -1,20 +1,34 @@
-# mongodb-mailgun
-Sends backup of all collections in mongodb using your mailgun api
+# mongodb-mailgun-backup
+Sends backup of all collections in a mongodb using mailgun.
+
 # Installation
 ```
-$ npm install mongodb-mailgun
+$ npm install mongodb-mailgun-backup
 ```
 # Use
 ```
-const MongoMail = require("mongodb-mailgun")
+const MongoMail = require("mongodb-mailgun-backup")
+require('dotenv').config();
 
-const mongoBackup = new MongoMail(MAILGUN_KEY, MAILGUN_DOMAIN, MAILGUN_HOST, MONGODB_URL)
-const mailgunData = {
-  from: "MyBackup hello@yourdomain.com",
-  to: "name@yourmail.com",
-  subject: 'Title of the backup mail',
-  html: "Body of the mail",
+const config = {
+  mailgun_key: process.env.MAILGUN_KEY,
+  mailgun_domain: process.env.MAILGUN_DOMAIN,
+  mailgun_host: process.env.MAILGUN_HOST,
+  mongo_uri: process.env.MONGODB_URI
 }
 
-mongoBackup.getBackupAll(mailgunData)
+const backupClient = new MongoMail(config)
+let mailgunParams = {
+  from: "YourApp your@email.com",   // Make sure this email is whitelisted in Mailgun
+  to: "receiver@email.com",         // Email of the receiver
+  subject: 'Whatever you want',     // Subject of the email
+  html: "This is a simple test",    // Body of the email
+}
+
+backupClient.mongoToMail(mailgunParams)
 ```
+The method doesn't return anything, but the progress is logged.
+# Todo
+* Add/improve error handling
+* Allow for mailing without Mailgun account
+* Allow for selecting a subset of collections to be backed up
